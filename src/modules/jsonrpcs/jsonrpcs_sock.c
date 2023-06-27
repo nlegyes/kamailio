@@ -124,7 +124,7 @@ int jsonrpc_dgram_mod_init(void)
 	struct hostent *host;
 	char *p, *host_s;
 	str port_str;
-	int len;
+	int len, len_buff;
 	int sep;
 
 	/* checking the mi_socket module param */
@@ -194,7 +194,7 @@ int jsonrpc_dgram_mod_init(void)
 
 	if(*jsonrpc_dgram_socket != '/') {
 		if(runtime_dir != NULL && *runtime_dir != 0) {
-			len = strlen(runtime_dir);
+			len_buff = len = strlen(runtime_dir);
 			sep = 0;
 			if(runtime_dir[len - 1] != '/') {
 				sep = 1;
@@ -205,10 +205,9 @@ int jsonrpc_dgram_mod_init(void)
 				LM_ERR("no more pkg\n");
 				return -1;
 			}
-			strcpy(p, runtime_dir);
-			if(sep)
-				strcat(p, "/");
-			strcat(p, jsonrpc_dgram_socket);
+			strncpy(p, runtime_dir, len);
+			snprintf(p + len_buff, len - len_buff, sep ? "/%s" : "%s",
+					jsonrpc_dgram_socket);
 			jsonrpc_dgram_socket = p;
 			LM_DBG("unix socket path is [%s]\n", jsonrpc_dgram_socket);
 		}

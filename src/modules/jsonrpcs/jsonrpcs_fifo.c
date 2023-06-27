@@ -538,7 +538,7 @@ static void jsonrpc_fifo_process(int rank)
  */
 int jsonrpc_fifo_mod_init(void)
 {
-	int len;
+	int len, len_buff;
 	int sep;
 	char *p;
 
@@ -549,7 +549,7 @@ int jsonrpc_fifo_mod_init(void)
 
 	if(*jsonrpc_fifo != '/') {
 		if(runtime_dir != NULL && *runtime_dir != 0) {
-			len = strlen(runtime_dir);
+			len_buff = len = strlen(runtime_dir);
 			sep = 0;
 			if(runtime_dir[len - 1] != '/') {
 				sep = 1;
@@ -560,10 +560,9 @@ int jsonrpc_fifo_mod_init(void)
 				LM_ERR("no more pkg\n");
 				return -1;
 			}
-			strcpy(p, runtime_dir);
-			if(sep)
-				strcat(p, "/");
-			strcat(p, jsonrpc_fifo);
+			strncpy(p, runtime_dir, len);
+			snprintf(p + len_buff, len - len_buff, sep ? "/%s" : "%s",
+					jsonrpc_fifo);
 			jsonrpc_fifo = p;
 			LM_DBG("fifo path is [%s]\n", jsonrpc_fifo);
 		}
